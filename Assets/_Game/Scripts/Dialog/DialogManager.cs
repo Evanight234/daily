@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,7 +8,6 @@ using UnityEngine.UI;
 public class DialogManager : MonoBehaviour
 {
     [SerializeField] DialogData dialogData;
-    [SerializeField] QuestData questData;
     [SerializeField] TMP_Text nameText;
     [SerializeField] TMP_Text dialogText;
     [SerializeField] Image backgroundImage;
@@ -15,6 +15,9 @@ public class DialogManager : MonoBehaviour
     [SerializeField] AudioSource musicSource;
     [SerializeField] GameObject dialogBox;
     [SerializeField] Button skipButton;
+    [SerializeField] Transform optionsContainer;
+    [SerializeField] TMP_Text feedbackText;
+    [SerializeField] GameObject optionButtonPrefab;
     [SerializeField] float charsPerSecond = 40f;
     [SerializeField, Range(0f, 1f)] float musicVolume = 0.5f;
     [SerializeField] bool playOnStart = true;
@@ -24,6 +27,9 @@ public class DialogManager : MonoBehaviour
     Coroutine _typeRoutine;
     string _fullText = "";
     DialogData _currentData;
+    bool _waitingAnswer;
+    DialogLine _currentQuestion;
+    List<Button> _answerButtons = new List<Button>();
 
     public bool IsPlaying { get; private set; }
 
@@ -56,6 +62,8 @@ public class DialogManager : MonoBehaviour
     {
         if (!IsPlaying)
             return;
+        if (_waitingAnswer)
+            return;
         if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
             Advance();
     }
@@ -83,7 +91,7 @@ public class DialogManager : MonoBehaviour
 
     public void Advance()
     {
-        if (!IsPlaying)
+        if (!IsPlaying || _waitingAnswer)
             return;
 
         if (_typing)
@@ -112,6 +120,15 @@ public class DialogManager : MonoBehaviour
         if (_typing)
             StopTyping();
 
+        if (_waitingAnswer)
+        {
+            _waitingAnswer = false;
+            ClearAnswerButtons();
+            feedbackText.text = "";
+            Advance();
+            return;
+        }
+
         CompleteDialog();
     }
 
@@ -128,6 +145,12 @@ public class DialogManager : MonoBehaviour
             backgroundImage.sprite = line.background;
             backgroundImage.enabled = true;
             backgroundImage.color = Color.white;
+        }
+
+        if (line.isQuestion && line.options != null && line.options.Length > 0)
+        {
+            ShowQuestion(line);
+            return;
         }
 
         voiceSource.Stop();
@@ -149,6 +172,75 @@ public class DialogManager : MonoBehaviour
         if (_typeRoutine != null)
             StopCoroutine(_typeRoutine);
         _typeRoutine = StartCoroutine(TypeText(_fullText));
+    }
+
+    void ShowQuestion(DialogLine line)
+    {
+        _waitingAnswer = true;
+        _currentQuestion = line;
+        feedbackText.text = "";
+
+        if (nameText != null)
+            nameText.text = line.speakerName;
+
+        if (dialogText != null)
+            dialogText.text = line.questionText;
+
+        ClearAnswerButtons();
+
+        for (int i = 0; i < line.options.Length; i++)
+        {
+            var btn = Instantiate(optionButtonPrefab, optionsContainer);
+            var btnText = btn.GetComponentInChildren<TMP_Text>();
+            if (btnText != null)
+                btnText.text = line.options[i];
+
+            var button = btn.GetComponent<Button>();
+            if (button != null)
+            {
+                int index = i;
+                button.onClick.AddListener(() => OnAnswer(index));
+                _answerButtons.Add(button);
+            }
+        }
+    }
+
+    void OnAnswer(int index)
+    {
+        if (!_waitingAnswer)
+            return;
+
+        ClearAnswerButtons();
+        _waitingAnswer = false;
+
+        bool isCorrect = index == _currentQuestion.correctIndex;
+        string feedback = isCorrect ? "Benar!" : "Salah! Jawaban: " + _currentQuestion.options[_currentQuestion.correctIndex];
+        Color feedbackColor = isCorrect ? Color.green : Color.red;
+
+        if (feedbackText != null)
+        {
+            feedbackText.text = feedback;
+            feedbackText.color = feedbackColor;
+        }
+
+        StartCoroutine(AdvanceAfterFeedback());
+    }
+
+    IEnumerator AdvanceAfterFeedback()
+    {
+        yield return new WaitForSeconds(2f);
+        feedbackText.text = "";
+        Advance();
+    }
+
+    void ClearAnswerButtons()
+    {
+        for (int i = 0; i < _answerButtons.Count; i++)
+        {
+            if (_answerButtons[i] != null)
+                Destroy(_answerButtons[i].gameObject);
+        }
+        _answerButtons.Clear();
     }
 
     IEnumerator TypeText(string full)
@@ -191,6 +283,7 @@ public class DialogManager : MonoBehaviour
     void CompleteDialog()
     {
         IsPlaying = false;
+        ClearAnswerButtons();
 
         if (dialogBox != null)
             dialogBox.SetActive(false);
@@ -218,11 +311,6 @@ public class DialogManager : MonoBehaviour
                     SceneManager.LoadScene(_currentData.sceneToLoad);
                 else
                     Debug.LogWarning("[DialogManager] sceneToLoad kosong, tidak bisa load scene.");
-            }
-            else if (questData != null && _currentData.endAction == DialogEndAction.None)
-            {
-                if (QuestManager.Instance != null)
-                    QuestManager.Instance.StartQuest(questData);
             }
         }
 

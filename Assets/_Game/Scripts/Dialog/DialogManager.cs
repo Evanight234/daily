@@ -92,13 +92,13 @@ public class DialogManager : MonoBehaviour
         feedbackRect.anchoredPosition = new Vector2(0, -40);
         feedbackRect.sizeDelta = new Vector2(500, 40);
 
-        var feedbackImage = feedbackGO.AddComponent<Image>();
-        feedbackImage.color = Color.clear;
-
-        var feedbackText = feedbackGO.AddComponent<TextMeshProUGUI>();
-        feedbackText.fontSize = 24;
-        feedbackText.alignment = TextAlignmentOptions.Center;
-        feedbackText.color = Color.clear;
+        var feedbackText = feedbackGO.AddComponent<TMP_Text>();
+        if (feedbackText != null)
+        {
+            feedbackText.fontSize = 24;
+            feedbackText.alignment = TextAlignmentOptions.Center;
+            feedbackText.color = Color.clear;
+        }
 
         _feedbackText = feedbackText;
     }

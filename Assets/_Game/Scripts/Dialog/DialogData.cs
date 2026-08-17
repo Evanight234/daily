@@ -16,6 +16,7 @@ public class DialogLine
     [TextArea(2, 6)]
     public string text;
     public AudioClip voice;
+    public AudioClip musicBackground;
     public Sprite background;
 }
 

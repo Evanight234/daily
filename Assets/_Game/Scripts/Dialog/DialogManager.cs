@@ -11,8 +11,11 @@ public class DialogManager : MonoBehaviour
     [SerializeField] TMP_Text dialogText;
     [SerializeField] Image backgroundImage;
     [SerializeField] AudioSource voiceSource;
+    [SerializeField] AudioSource musicSource;
     [SerializeField] GameObject dialogBox;
+    [SerializeField] Button skipButton;
     [SerializeField] float charsPerSecond = 40f;
+    [SerializeField, Range(0f, 1f)] float musicVolume = 0.5f;
     [SerializeField] bool playOnStart = true;
 
     int _index = -1;
@@ -30,6 +33,16 @@ public class DialogManager : MonoBehaviour
         if (voiceSource == null)
             voiceSource = gameObject.AddComponent<AudioSource>();
         voiceSource.playOnAwake = false;
+
+        if (musicSource == null)
+            musicSource = GetComponent<AudioSource>();
+        if (musicSource == null)
+            musicSource = gameObject.AddComponent<AudioSource>();
+        musicSource.playOnAwake = false;
+        musicSource.loop = true;
+
+        if (skipButton != null)
+            skipButton.onClick.AddListener(SkipDialog);
     }
 
     void Start()
@@ -61,6 +74,9 @@ public class DialogManager : MonoBehaviour
         if (dialogBox != null)
             dialogBox.SetActive(true);
 
+        if (skipButton != null)
+            skipButton.gameObject.SetActive(true);
+
         Advance();
     }
 
@@ -87,6 +103,17 @@ public class DialogManager : MonoBehaviour
         ShowLine(_currentData.lines[_index]);
     }
 
+    public void SkipDialog()
+    {
+        if (!IsPlaying)
+            return;
+
+        if (_typing)
+            StopTyping();
+
+        CompleteDialog();
+    }
+
     void ShowLine(DialogLine line)
     {
         if (line == null)
@@ -107,6 +134,14 @@ public class DialogManager : MonoBehaviour
         {
             voiceSource.clip = line.voice;
             voiceSource.Play();
+        }
+
+        if (line.musicBackground != null && line.musicBackground != musicSource.clip)
+        {
+            musicSource.Stop();
+            musicSource.clip = line.musicBackground;
+            musicSource.volume = musicVolume;
+            musicSource.Play();
         }
 
         _fullText = line.text ?? "";
@@ -159,12 +194,18 @@ public class DialogManager : MonoBehaviour
         if (dialogBox != null)
             dialogBox.SetActive(false);
 
+        if (skipButton != null)
+            skipButton.gameObject.SetActive(false);
+
         if (nameText != null)
             nameText.text = "";
         if (dialogText != null)
             dialogText.text = "";
         if (backgroundImage != null)
             backgroundImage.enabled = false;
+
+        if (musicSource != null)
+            musicSource.Stop();
 
         if (_currentData != null)
         {

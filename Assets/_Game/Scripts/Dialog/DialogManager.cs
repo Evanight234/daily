@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class DialogManager : MonoBehaviour
 {
     [SerializeField] DialogData dialogData;
+    [SerializeField] QuestData questData;
     [SerializeField] TMP_Text nameText;
     [SerializeField] TMP_Text dialogText;
     [SerializeField] Image backgroundImage;
@@ -217,6 +218,11 @@ public class DialogManager : MonoBehaviour
                     SceneManager.LoadScene(_currentData.sceneToLoad);
                 else
                     Debug.LogWarning("[DialogManager] sceneToLoad kosong, tidak bisa load scene.");
+            }
+            else if (questData != null && _currentData.endAction == DialogEndAction.None)
+            {
+                if (QuestManager.Instance != null)
+                    QuestManager.Instance.StartQuest(questData);
             }
         }
 

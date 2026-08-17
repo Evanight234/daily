@@ -15,9 +15,6 @@ public class DialogManager : MonoBehaviour
     [SerializeField] AudioSource musicSource;
     [SerializeField] GameObject dialogBox;
     [SerializeField] Button skipButton;
-    [SerializeField] Transform optionsContainer;
-    [SerializeField] TMP_Text feedbackText;
-    [SerializeField] GameObject optionButtonPrefab;
     [SerializeField] float charsPerSecond = 40f;
     [SerializeField, Range(0f, 1f)] float musicVolume = 0.5f;
     [SerializeField] bool playOnStart = true;
@@ -30,6 +27,9 @@ public class DialogManager : MonoBehaviour
     bool _waitingAnswer;
     DialogLine _currentQuestion;
     List<Button> _answerButtons = new List<Button>();
+    Transform _optionsContainer;
+    TMP_Text _feedbackText;
+    Canvas _canvas;
 
     public bool IsPlaying { get; private set; }
 
@@ -50,6 +50,57 @@ public class DialogManager : MonoBehaviour
 
         if (skipButton != null)
             skipButton.onClick.AddListener(SkipDialog);
+
+        CreateQuestionUI();
+    }
+
+    void CreateQuestionUI()
+    {
+        if (dialogBox == null) return;
+
+        _canvas = dialogBox.GetComponentInParent<Canvas>();
+        if (_canvas == null) return;
+
+        string containerName = "OptionsContainer_" + gameObject.name;
+        var containerGO = new GameObject(containerName);
+        containerGO.transform.SetParent(_canvas.transform, false);
+        var rectTransform = containerGO.AddComponent<RectTransform>();
+        rectTransform.anchorMin = new Vector2(0.5f, 0f);
+        rectTransform.anchorMax = new Vector2(0.5f, 0f);
+        rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        rectTransform.anchoredPosition = new Vector2(0, 100);
+        rectTransform.sizeDelta = new Vector2(600, 120);
+
+        var layoutGroup = containerGO.AddComponent<VerticalLayoutGroup>();
+        layoutGroup.childAlignment = TextAnchor.MiddleCenter;
+        layoutGroup.spacing = 10;
+        layoutGroup.childControlHeight = false;
+        layoutGroup.childControlWidth = true;
+
+        var contentSizeFitter = containerGO.AddComponent<ContentSizeFitter>();
+        contentSizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        _optionsContainer = rectTransform;
+
+        string feedbackName = "FeedbackText_" + gameObject.name;
+        var feedbackGO = new GameObject(feedbackName);
+        feedbackGO.transform.SetParent(_canvas.transform, false);
+        var feedbackRect = feedbackGO.AddComponent<RectTransform>();
+        feedbackRect.anchorMin = new Vector2(0.5f, 0f);
+        feedbackRect.anchorMax = new Vector2(0.5f, 0f);
+        feedbackRect.pivot = new Vector2(0.5f, 0.5f);
+        feedbackRect.anchoredPosition = new Vector2(0, -40);
+        feedbackRect.sizeDelta = new Vector2(500, 40);
+
+        var feedbackImage = feedbackGO.AddComponent<Image>();
+        feedbackImage.color = Color.clear;
+
+        var feedbackText = feedbackGO.AddComponent<TextMeshProUGUI>();
+        feedbackText.fontSize = 24;
+        feedbackText.alignment = TextAlignmentOptions.Center;
+        feedbackText.color = Color.clear;
+
+        _feedbackText = feedbackText;
     }
 
     void Start()
@@ -124,7 +175,8 @@ public class DialogManager : MonoBehaviour
         {
             _waitingAnswer = false;
             ClearAnswerButtons();
-            feedbackText.text = "";
+        if (_feedbackText != null)
+            _feedbackText.text = "";
             Advance();
             return;
         }
@@ -178,7 +230,9 @@ public class DialogManager : MonoBehaviour
     {
         _waitingAnswer = true;
         _currentQuestion = line;
-        feedbackText.text = "";
+
+        if (_feedbackText != null)
+            _feedbackText.color = Color.clear;
 
         if (nameText != null)
             nameText.text = line.speakerName;
@@ -190,18 +244,31 @@ public class DialogManager : MonoBehaviour
 
         for (int i = 0; i < line.options.Length; i++)
         {
-            var btn = Instantiate(optionButtonPrefab, optionsContainer);
-            var btnText = btn.GetComponentInChildren<TMP_Text>();
-            if (btnText != null)
-                btnText.text = line.options[i];
+            var btnGO = new GameObject("OptionButton_" + i);
+            btnGO.transform.SetParent(_optionsContainer, false);
+            var rectTransform = btnGO.AddComponent<RectTransform>();
+            rectTransform.sizeDelta = new Vector2(400, 50);
 
-            var button = btn.GetComponent<Button>();
-            if (button != null)
-            {
-                int index = i;
-                button.onClick.AddListener(() => OnAnswer(index));
-                _answerButtons.Add(button);
-            }
+            var btnImage = btnGO.AddComponent<Image>();
+            btnImage.color = new Color(0.15f, 0.15f, 0.2f, 0.9f);
+
+            var button = btnGO.AddComponent<Button>();
+            int index = i;
+            button.onClick.AddListener(() => OnAnswer(index));
+            _answerButtons.Add(button);
+
+            var textGO = new GameObject("OptionButtonText");
+            textGO.transform.SetParent(btnGO.transform, false);
+            var textRect = textGO.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.sizeDelta = Vector2.zero;
+
+            var buttonText = textGO.AddComponent<TextMeshProUGUI>();
+            buttonText.text = line.options[i];
+            buttonText.fontSize = 20;
+            buttonText.alignment = TextAlignmentOptions.Center;
+            buttonText.color = Color.white;
         }
     }
 
@@ -217,10 +284,10 @@ public class DialogManager : MonoBehaviour
         string feedback = isCorrect ? "Benar!" : "Salah! Jawaban: " + _currentQuestion.options[_currentQuestion.correctIndex];
         Color feedbackColor = isCorrect ? Color.green : Color.red;
 
-        if (feedbackText != null)
+        if (_feedbackText != null)
         {
-            feedbackText.text = feedback;
-            feedbackText.color = feedbackColor;
+            _feedbackText.text = feedback;
+            _feedbackText.color = feedbackColor;
         }
 
         StartCoroutine(AdvanceAfterFeedback());
@@ -229,7 +296,8 @@ public class DialogManager : MonoBehaviour
     IEnumerator AdvanceAfterFeedback()
     {
         yield return new WaitForSeconds(2f);
-        feedbackText.text = "";
+        if (_feedbackText != null)
+            _feedbackText.text = "";
         Advance();
     }
 

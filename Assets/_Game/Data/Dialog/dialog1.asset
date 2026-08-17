@@ -61,8 +61,8 @@ MonoBehaviour:
     text: 
     voice: {fileID: 0}
     background: {fileID: 0}
-  endAction: 0
-  sceneToLoad: 
+  endAction: 1
+  sceneToLoad: dialog1
   onComplete:
     m_PersistentCalls:
       m_Calls: []

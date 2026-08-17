@@ -264,11 +264,14 @@ public class DialogManager : MonoBehaviour
             textRect.anchorMax = Vector2.one;
             textRect.sizeDelta = Vector2.zero;
 
-            var buttonText = textGO.AddComponent<TextMeshProUGUI>();
-            buttonText.text = line.options[i];
-            buttonText.fontSize = 20;
-            buttonText.alignment = TextAlignmentOptions.Center;
-            buttonText.color = Color.white;
+            var buttonText = textGO.AddComponent<TMP_Text>();
+            if (textGO != null && buttonText != null)
+            {
+                buttonText.text = line.options[i];
+                buttonText.fontSize = 20;
+                buttonText.alignment = TextAlignmentOptions.Center;
+                buttonText.color = Color.white;
+            }
         }
     }
 

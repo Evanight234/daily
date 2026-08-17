@@ -42,6 +42,12 @@ public class QuestManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Tab))
+            ToggleQuestLog();
+    }
+
     public void StartQuest(QuestData quest)
     {
         currentQuest = quest;
@@ -158,14 +164,12 @@ public class QuestManager : MonoBehaviour
         }
     }
 
-    public void ShowQuestLog()
+    public void ToggleQuestLog()
     {
-        questLogPanel.SetActive(true);
-    }
-
-    public void HideQuestLog()
-    {
-        questLogPanel.SetActive(false);
+        if (questLogPanel.activeSelf)
+            questLogPanel.SetActive(false);
+        else
+            questLogPanel.SetActive(true);
     }
 
     public void BackToDialogue()

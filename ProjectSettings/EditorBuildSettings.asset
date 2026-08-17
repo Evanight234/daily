@@ -11,4 +11,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/Scenes/Quest1MTK.unity
+    guid: a6c361b44f88fa448b61e0423a8711c7
+  - enabled: 1
+    path: Assets/Scenes/dialog2.unity
+    guid: 45985d13d33b1514db6c73d7e5b71ca5
   m_configObjects: {}

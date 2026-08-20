@@ -1079,7 +1079,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2100000002}
   - component: {fileID: 2100000004}
-  - component: {fileID: 2100000003}
+  - component: {fileID: 2100000005}
   m_Layer: 0
   m_Name: DialogManager
   m_TagString: Untagged
@@ -1102,27 +1102,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2100000003
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2100000001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b2d9f4e1a8c5073d6e2b9f4a1c8e5d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  dialogData: {fileID: 11400000, guid: ccf514502901d9c47a1aad7a7356aa87, type: 2}
-  nameText: {fileID: 1912660261}
-  dialogText: {fileID: 311245797}
-  backgroundImage: {fileID: 850222003}
-  voiceSource: {fileID: 2100000004}
-  dialogBox: {fileID: 1902130716}
-  skipButton: {fileID: 320000003}
-  charsPerSecond: 40
-  playOnStart: 1
 --- !u!82 &2100000004
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1219,3 +1198,27 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &2100000005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2100000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8d4f02a5c3e7916d2f9b4a7c0e1538f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  questData: {fileID: 11400000, guid: c9e5a2b8d4f70136e8a1c4b7d0f2539a, type: 2}
+  nameText: {fileID: 1912660261}
+  dialogText: {fileID: 311245797}
+  backgroundImage: {fileID: 0}
+  voiceSource: {fileID: 0}
+  musicSource: {fileID: 0}
+  dialogBox: {fileID: 1902130716}
+  skipButton: {fileID: 320000003}
+  musicVolume: 0.5
+  playOnStart: 1
+  optionsPosition: {x: 0, y: 230}
+  feedbackPosition: {x: -300, y: 400}

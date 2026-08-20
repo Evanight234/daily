@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -24,12 +23,6 @@ public class DialogManager : MonoBehaviour
     Coroutine _typeRoutine;
     string _fullText = "";
     DialogData _currentData;
-    bool _waitingAnswer;
-    DialogLine _currentQuestion;
-    List<Button> _answerButtons = new List<Button>();
-    Transform _optionsContainer;
-    TMP_Text _feedbackText;
-    Canvas _canvas;
 
     public bool IsPlaying { get; private set; }
 
@@ -42,65 +35,12 @@ public class DialogManager : MonoBehaviour
         voiceSource.playOnAwake = false;
 
         if (musicSource == null)
-            musicSource = GetComponent<AudioSource>();
-        if (musicSource == null)
             musicSource = gameObject.AddComponent<AudioSource>();
         musicSource.playOnAwake = false;
         musicSource.loop = true;
 
         if (skipButton != null)
             skipButton.onClick.AddListener(SkipDialog);
-
-        CreateQuestionUI();
-    }
-
-    void CreateQuestionUI()
-    {
-        if (dialogBox == null) return;
-
-        _canvas = dialogBox.GetComponentInParent<Canvas>();
-        if (_canvas == null) return;
-
-        string containerName = "OptionsContainer_" + gameObject.name;
-        var containerGO = new GameObject(containerName);
-        containerGO.transform.SetParent(_canvas.transform, false);
-        var rectTransform = containerGO.AddComponent<RectTransform>();
-        rectTransform.anchorMin = new Vector2(0.5f, 0f);
-        rectTransform.anchorMax = new Vector2(0.5f, 0f);
-        rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.anchoredPosition = new Vector2(0, 100);
-        rectTransform.sizeDelta = new Vector2(600, 120);
-
-        var layoutGroup = containerGO.AddComponent<VerticalLayoutGroup>();
-        layoutGroup.childAlignment = TextAnchor.MiddleCenter;
-        layoutGroup.spacing = 10;
-        layoutGroup.childControlHeight = false;
-        layoutGroup.childControlWidth = true;
-
-        var contentSizeFitter = containerGO.AddComponent<ContentSizeFitter>();
-        contentSizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        _optionsContainer = rectTransform;
-
-        string feedbackName = "FeedbackText_" + gameObject.name;
-        var feedbackGO = new GameObject(feedbackName);
-        feedbackGO.transform.SetParent(_canvas.transform, false);
-        var feedbackRect = feedbackGO.AddComponent<RectTransform>();
-        feedbackRect.anchorMin = new Vector2(0.5f, 0f);
-        feedbackRect.anchorMax = new Vector2(0.5f, 0f);
-        feedbackRect.pivot = new Vector2(0.5f, 0.5f);
-        feedbackRect.anchoredPosition = new Vector2(0, -40);
-        feedbackRect.sizeDelta = new Vector2(500, 40);
-
-        var feedbackText = feedbackGO.AddComponent<TMP_Text>();
-        if (feedbackText != null)
-        {
-            feedbackText.fontSize = 24;
-            feedbackText.alignment = TextAlignmentOptions.Center;
-            feedbackText.color = Color.clear;
-        }
-
-        _feedbackText = feedbackText;
     }
 
     void Start()
@@ -112,8 +52,6 @@ public class DialogManager : MonoBehaviour
     void Update()
     {
         if (!IsPlaying)
-            return;
-        if (_waitingAnswer)
             return;
         if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
             Advance();
@@ -142,7 +80,7 @@ public class DialogManager : MonoBehaviour
 
     public void Advance()
     {
-        if (!IsPlaying || _waitingAnswer)
+        if (!IsPlaying)
             return;
 
         if (_typing)
@@ -154,7 +92,7 @@ public class DialogManager : MonoBehaviour
         }
 
         _index++;
-        if (_index >= _currentData.lines.Count)
+        if (_currentData == null || _index >= _currentData.lines.Count)
         {
             CompleteDialog();
             return;
@@ -170,16 +108,6 @@ public class DialogManager : MonoBehaviour
 
         if (_typing)
             StopTyping();
-
-        if (_waitingAnswer)
-        {
-            _waitingAnswer = false;
-            ClearAnswerButtons();
-        if (_feedbackText != null)
-            _feedbackText.text = "";
-            Advance();
-            return;
-        }
 
         CompleteDialog();
     }
@@ -199,20 +127,17 @@ public class DialogManager : MonoBehaviour
             backgroundImage.color = Color.white;
         }
 
-        if (line.isQuestion && line.options != null && line.options.Length > 0)
+        if (voiceSource != null)
         {
-            ShowQuestion(line);
-            return;
+            voiceSource.Stop();
+            if (line.voice != null)
+            {
+                voiceSource.clip = line.voice;
+                voiceSource.Play();
+            }
         }
 
-        voiceSource.Stop();
-        if (line.voice != null)
-        {
-            voiceSource.clip = line.voice;
-            voiceSource.Play();
-        }
-
-        if (line.musicBackground != null && line.musicBackground != musicSource.clip)
+        if (musicSource != null && line.musicBackground != null && line.musicBackground != musicSource.clip)
         {
             musicSource.Stop();
             musicSource.clip = line.musicBackground;
@@ -224,94 +149,6 @@ public class DialogManager : MonoBehaviour
         if (_typeRoutine != null)
             StopCoroutine(_typeRoutine);
         _typeRoutine = StartCoroutine(TypeText(_fullText));
-    }
-
-    void ShowQuestion(DialogLine line)
-    {
-        _waitingAnswer = true;
-        _currentQuestion = line;
-
-        if (_feedbackText != null)
-            _feedbackText.color = Color.clear;
-
-        if (nameText != null)
-            nameText.text = line.speakerName;
-
-        if (dialogText != null)
-            dialogText.text = line.questionText;
-
-        ClearAnswerButtons();
-
-        for (int i = 0; i < line.options.Length; i++)
-        {
-            var btnGO = new GameObject("OptionButton_" + i);
-            btnGO.transform.SetParent(_optionsContainer, false);
-            var rectTransform = btnGO.AddComponent<RectTransform>();
-            rectTransform.sizeDelta = new Vector2(400, 50);
-
-            var btnImage = btnGO.AddComponent<Image>();
-            btnImage.color = new Color(0.15f, 0.15f, 0.2f, 0.9f);
-
-            var button = btnGO.AddComponent<Button>();
-            int index = i;
-            button.onClick.AddListener(() => OnAnswer(index));
-            _answerButtons.Add(button);
-
-            var textGO = new GameObject("OptionButtonText");
-            textGO.transform.SetParent(btnGO.transform, false);
-            var textRect = textGO.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
-
-            var buttonText = textGO.AddComponent<TMP_Text>();
-            if (textGO != null && buttonText != null)
-            {
-                buttonText.text = line.options[i];
-                buttonText.fontSize = 20;
-                buttonText.alignment = TextAlignmentOptions.Center;
-                buttonText.color = Color.white;
-            }
-        }
-    }
-
-    void OnAnswer(int index)
-    {
-        if (!_waitingAnswer)
-            return;
-
-        ClearAnswerButtons();
-        _waitingAnswer = false;
-
-        bool isCorrect = index == _currentQuestion.correctIndex;
-        string feedback = isCorrect ? "Benar!" : "Salah! Jawaban: " + _currentQuestion.options[_currentQuestion.correctIndex];
-        Color feedbackColor = isCorrect ? Color.green : Color.red;
-
-        if (_feedbackText != null)
-        {
-            _feedbackText.text = feedback;
-            _feedbackText.color = feedbackColor;
-        }
-
-        StartCoroutine(AdvanceAfterFeedback());
-    }
-
-    IEnumerator AdvanceAfterFeedback()
-    {
-        yield return new WaitForSeconds(2f);
-        if (_feedbackText != null)
-            _feedbackText.text = "";
-        Advance();
-    }
-
-    void ClearAnswerButtons()
-    {
-        for (int i = 0; i < _answerButtons.Count; i++)
-        {
-            if (_answerButtons[i] != null)
-                Destroy(_answerButtons[i].gameObject);
-        }
-        _answerButtons.Clear();
     }
 
     IEnumerator TypeText(string full)
@@ -354,7 +191,6 @@ public class DialogManager : MonoBehaviour
     void CompleteDialog()
     {
         IsPlaying = false;
-        ClearAnswerButtons();
 
         if (dialogBox != null)
             dialogBox.SetActive(false);

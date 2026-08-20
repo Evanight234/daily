@@ -18,13 +18,6 @@ public class DialogLine
     public AudioClip voice;
     public AudioClip musicBackground;
     public Sprite background;
-
-    [Header("Question Mode")]
-    public bool isQuestion;
-    [TextArea(2, 4)]
-    public string questionText;
-    public string[] options;
-    public int correctIndex;
 }
 
 [CreateAssetMenu(fileName = "NewDialog", menuName = "Daily/Dialog Data")]

@@ -16,18 +16,22 @@ MonoBehaviour:
   - speakerName: Guru
     text: Selamat pagi, anak-anak. Hari ini hari pertamamu di sekolah ini.
     voice: {fileID: 0}
+    musicBackground: {fileID: 0}
     background: {fileID: 0}
   - speakerName: Andi
     text: Pagi, Bu. Aku sedikit gugup...
     voice: {fileID: 0}
+    musicBackground: {fileID: 0}
     background: {fileID: 0}
   - speakerName: Guru
     text: Tenang saja. Kerjakan tugas yang kuberikan, dan kamu pasti bisa.
     voice: {fileID: 0}
+    musicBackground: {fileID: 0}
     background: {fileID: 0}
   - speakerName: Andi
     text: Baik, Bu. Aku akan berusaha!
     voice: {fileID: 0}
+    musicBackground: {fileID: 0}
     background: {fileID: 0}
   endAction: 1
   sceneToLoad: SampleScene

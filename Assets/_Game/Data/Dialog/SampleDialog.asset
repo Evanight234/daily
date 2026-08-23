@@ -34,7 +34,7 @@ MonoBehaviour:
     musicBackground: {fileID: 0}
     background: {fileID: 0}
   endAction: 1
-  sceneToLoad: SampleScene
+  sceneToLoad: dialog2
   onComplete:
     m_PersistentCalls:
       m_Calls: []

@@ -14,7 +14,6 @@ public class DialogQuestManager : MonoBehaviour
     [SerializeField] AudioSource voiceSource;
     [SerializeField] AudioSource musicSource;
     [SerializeField] GameObject dialogBox;
-    [SerializeField] Button skipButton;
     [SerializeField, Range(0f, 1f)] float musicVolume = 0.5f;
     [SerializeField] bool playOnStart = true;
     [SerializeField] Vector2 optionsPosition = new Vector2(0, 100);
@@ -49,9 +48,6 @@ public class DialogQuestManager : MonoBehaviour
             musicSource = gameObject.AddComponent<AudioSource>();
         musicSource.playOnAwake = false;
         musicSource.loop = true;
-
-        if (skipButton != null)
-            skipButton.onClick.AddListener(SkipQuest);
 
         CreateQuestionUI();
     }
@@ -121,20 +117,8 @@ public class DialogQuestManager : MonoBehaviour
 
         if (dialogBox != null)
             dialogBox.SetActive(true);
-        if (skipButton != null)
-            skipButton.gameObject.SetActive(true);
 
         Advance();
-    }
-
-    public void SkipQuest()
-    {
-        if (!IsPlaying)
-            return;
-
-        StopFeedbackRoutine();
-        _waitingAnswer = false;
-        CompleteQuest();
     }
 
     void Advance()
@@ -351,8 +335,6 @@ public class DialogQuestManager : MonoBehaviour
 
         if (dialogBox != null)
             dialogBox.SetActive(false);
-        if (skipButton != null)
-            skipButton.gameObject.SetActive(false);
         if (nameText != null)
             nameText.text = "";
         if (dialogText != null)

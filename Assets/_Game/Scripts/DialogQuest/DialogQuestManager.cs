@@ -14,7 +14,6 @@ public class DialogQuestManager : MonoBehaviour
     [SerializeField] AudioSource voiceSource;
     [SerializeField] AudioSource musicSource;
     [SerializeField] GameObject dialogBox;
-    [SerializeField, Range(0f, 1f)] float musicVolume = 0.5f;
     [SerializeField] bool playOnStart = true;
     [SerializeField] Vector2 optionsPosition = new Vector2(0, 100);
     [SerializeField] Vector2 feedbackPosition = new Vector2(0, 230);
@@ -184,6 +183,7 @@ public class DialogQuestManager : MonoBehaviour
             if (line.voice != null)
             {
                 voiceSource.clip = line.voice;
+                voiceSource.volume = PlayerPrefs.GetFloat("VoiceVolume", 0.8f);
                 voiceSource.Play();
             }
         }
@@ -192,7 +192,7 @@ public class DialogQuestManager : MonoBehaviour
         {
             musicSource.Stop();
             musicSource.clip = line.musicBackground;
-            musicSource.volume = musicVolume;
+            musicSource.volume = PlayerPrefs.GetFloat("BGMVolume", 0.8f);
             musicSource.Play();
         }
 
@@ -251,7 +251,9 @@ public class DialogQuestManager : MonoBehaviour
         bool isCorrect = _currentQuestion.options[index].isCorrect;
         ApplyAnswerVisuals(index);
 
-        string feedback = isCorrect ? "Benar!" : "Salah!";
+        string feedback = isCorrect
+            ? LocalizationManager.Get("dialog.correct")
+            : LocalizationManager.Get("dialog.wrong");
         if (_feedbackText != null)
         {
             _feedbackText.text = feedback;

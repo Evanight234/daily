@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -15,7 +16,6 @@ public class DialogManager : MonoBehaviour
     [SerializeField] GameObject dialogBox;
     [SerializeField] Button skipButton;
     [SerializeField] float charsPerSecond = 40f;
-    [SerializeField, Range(0f, 1f)] float musicVolume = 0.5f;
     [SerializeField] bool playOnStart = true;
 
     int _index = -1;
@@ -53,7 +53,16 @@ public class DialogManager : MonoBehaviour
     {
         if (!IsPlaying)
             return;
-        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                return;
+            Advance();
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
             Advance();
     }
 
@@ -133,6 +142,7 @@ public class DialogManager : MonoBehaviour
             if (line.voice != null)
             {
                 voiceSource.clip = line.voice;
+                voiceSource.volume = PlayerPrefs.GetFloat("VoiceVolume", 0.8f);
                 voiceSource.Play();
             }
         }
@@ -141,7 +151,7 @@ public class DialogManager : MonoBehaviour
         {
             musicSource.Stop();
             musicSource.clip = line.musicBackground;
-            musicSource.volume = musicVolume;
+            musicSource.volume = PlayerPrefs.GetFloat("BGMVolume", 0.8f);
             musicSource.Play();
         }
 

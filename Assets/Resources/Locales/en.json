@@ -1,0 +1,30 @@
+{
+    "menu": {
+        "play": "Play",
+        "settings": "Settings",
+        "quit": "Quit"
+    },
+    "settings": {
+        "title": "Settings",
+        "master": "Master",
+        "bgm": "Music",
+        "sfx": "Sound Effects",
+        "voice": "Voice",
+        "fullscreen": "Fullscreen",
+        "language": "Language",
+        "close": "Close"
+    },
+    "dialog": {
+        "skip": "Skip",
+        "correct": "Correct!",
+        "wrong": "Wrong!"
+    },
+    "common": {
+        "yes": "Yes",
+        "no": "No",
+        "confirm": "Confirm",
+        "save": "Save",
+        "cancel": "Cancel",
+        "loading": "Loading..."
+    }
+}

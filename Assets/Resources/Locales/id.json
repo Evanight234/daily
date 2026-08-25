@@ -1,0 +1,30 @@
+{
+    "menu": {
+        "play": "Mulai",
+        "settings": "Pengaturan",
+        "quit": "Keluar"
+    },
+    "settings": {
+        "title": "Pengaturan",
+        "master": "Volume utama",
+        "bgm": "Musik",
+        "sfx": "Efek Suara",
+        "voice": "Suara",
+        "fullscreen": "Layar Penuh",
+        "language": "Bahasa",
+        "close": "Tutup"
+    },
+    "dialog": {
+        "skip": "Lewati",
+        "correct": "Benar!",
+        "wrong": "Salah!"
+    },
+    "common": {
+        "yes": "Ya",
+        "no": "Tidak",
+        "confirm": "Konfirmasi",
+        "save": "Simpan",
+        "cancel": "Batal",
+        "loading": "Memuat..."
+    }
+}

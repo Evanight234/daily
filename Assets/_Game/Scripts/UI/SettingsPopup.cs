@@ -4,6 +4,11 @@ using UnityEngine.UI;
 
 public class SettingsPopup : MonoBehaviour
 {
+    public static event System.Action<float> onMasterChanged;
+    public static event System.Action<float> onBGMChanged;
+    public static event System.Action<float> onSFXChanged;
+    public static event System.Action<float> onVoiceChanged;
+
     [SerializeField] private GameObject panel;
     [SerializeField] private Button closeButton;
     [SerializeField] private Slider masterSlider;
@@ -20,6 +25,7 @@ public class SettingsPopup : MonoBehaviour
     Button _langIdButton;
     Button _langEnButton;
     LocalizationManager _subscribedManager;
+    CanvasGroup _overlayCanvasGroup;
 
     static readonly Color SliderBgColor = new Color(0.25f, 0.25f, 0.3f, 1f);
     static readonly Color SliderFillColor = new Color(0.2f, 0.65f, 0.3f, 1f);
@@ -39,6 +45,10 @@ public class SettingsPopup : MonoBehaviour
             return;
         }
 
+        _overlayCanvasGroup = panel.GetComponent<CanvasGroup>();
+        if (_overlayCanvasGroup == null)
+            _overlayCanvasGroup = panel.AddComponent<CanvasGroup>();
+
         if (closeButton != null) closeButton.onClick.AddListener(Close);
         if (masterSlider != null) masterSlider.onValueChanged.AddListener(OnMasterChanged);
         if (bgmSlider != null) bgmSlider.onValueChanged.AddListener(OnBGMChanged);
@@ -48,7 +58,17 @@ public class SettingsPopup : MonoBehaviour
         if (languageDropdown != null) languageDropdown.onValueChanged.AddListener(OnLanguageChanged);
 
         LoadSettings();
-        panel.SetActive(false);
+        HidePanel();
+    }
+
+    void HidePanel()
+    {
+        if (_overlayCanvasGroup != null)
+        {
+            _overlayCanvasGroup.alpha = 0f;
+            _overlayCanvasGroup.blocksRaycasts = false;
+            _overlayCanvasGroup.interactable = false;
+        }
     }
 
     private void LoadSettings()
@@ -101,14 +121,18 @@ public class SettingsPopup : MonoBehaviour
 
     public void Open()
     {
-        if (panel != null)
-            panel.SetActive(true);
+        if (panel != null && _overlayCanvasGroup != null)
+        {
+            panel.transform.SetAsLastSibling();
+            _overlayCanvasGroup.alpha = 1f;
+            _overlayCanvasGroup.blocksRaycasts = true;
+            _overlayCanvasGroup.interactable = true;
+        }
     }
 
     public void Close()
     {
-        if (panel != null)
-            panel.SetActive(false);
+        HidePanel();
     }
 
     public void OnMasterChanged(float value)
@@ -117,6 +141,7 @@ public class SettingsPopup : MonoBehaviour
         AudioListener.volume = value;
         UpdatePercentText(masterPercent, value);
         PlayerPrefs.Save();
+        onMasterChanged?.Invoke(value);
     }
 
     public void OnBGMChanged(float value)
@@ -124,6 +149,7 @@ public class SettingsPopup : MonoBehaviour
         PlayerPrefs.SetFloat("BGMVolume", value);
         UpdatePercentText(bgmPercent, value);
         PlayerPrefs.Save();
+        onBGMChanged?.Invoke(value);
     }
 
     public void OnSFXChanged(float value)
@@ -131,6 +157,7 @@ public class SettingsPopup : MonoBehaviour
         PlayerPrefs.SetFloat("SFXVolume", value);
         UpdatePercentText(sfxPercent, value);
         PlayerPrefs.Save();
+        onSFXChanged?.Invoke(value);
     }
 
     public void OnVoiceChanged(float value)
@@ -138,6 +165,7 @@ public class SettingsPopup : MonoBehaviour
         PlayerPrefs.SetFloat("VoiceVolume", value);
         UpdatePercentText(voicePercent, value);
         PlayerPrefs.Save();
+        onVoiceChanged?.Invoke(value);
     }
 
     public void OnFullscreenChanged(bool isOn)

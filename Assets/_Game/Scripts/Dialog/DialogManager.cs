@@ -13,6 +13,7 @@ public class DialogManager : MonoBehaviour
     [SerializeField] Image backgroundImage;
     [SerializeField] AudioSource voiceSource;
     [SerializeField] AudioSource musicSource;
+    [SerializeField] AudioSource sfxSource;
     [SerializeField] GameObject dialogBox;
     [SerializeField] Button skipButton;
     [SerializeField] float charsPerSecond = 40f;
@@ -39,8 +40,41 @@ public class DialogManager : MonoBehaviour
         musicSource.playOnAwake = false;
         musicSource.loop = true;
 
+        if (sfxSource == null)
+            sfxSource = gameObject.AddComponent<AudioSource>();
+        sfxSource.playOnAwake = false;
+
         if (skipButton != null)
             skipButton.onClick.AddListener(SkipDialog);
+    }
+
+    void OnEnable()
+    {
+        SettingsPopup.onBGMChanged += SetBGMVolume;
+        SettingsPopup.onVoiceChanged += SetVoiceVolume;
+        SettingsPopup.onSFXChanged += SetSFXVolume;
+    }
+
+    void OnDisable()
+    {
+        SettingsPopup.onBGMChanged -= SetBGMVolume;
+        SettingsPopup.onVoiceChanged -= SetVoiceVolume;
+        SettingsPopup.onSFXChanged -= SetSFXVolume;
+    }
+
+    void SetBGMVolume(float value)
+    {
+        if (musicSource != null) musicSource.volume = value;
+    }
+
+    void SetVoiceVolume(float value)
+    {
+        if (voiceSource != null) voiceSource.volume = value;
+    }
+
+    void SetSFXVolume(float value)
+    {
+        if (sfxSource != null) sfxSource.volume = value;
     }
 
     void Start()
@@ -153,6 +187,14 @@ public class DialogManager : MonoBehaviour
             musicSource.clip = line.musicBackground;
             musicSource.volume = PlayerPrefs.GetFloat("BGMVolume", 0.8f);
             musicSource.Play();
+        }
+
+        if (sfxSource != null && line.sfx != null)
+        {
+            sfxSource.Stop();
+            sfxSource.clip = line.sfx;
+            sfxSource.volume = PlayerPrefs.GetFloat("SFXVolume", 0.8f);
+            sfxSource.Play();
         }
 
         _fullText = line.text ?? "";

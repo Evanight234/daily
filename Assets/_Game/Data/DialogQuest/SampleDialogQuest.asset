@@ -24,6 +24,8 @@ MonoBehaviour:
       isCorrect: 1
     voice: {fileID: 0}
     musicBackground: {fileID: 0}
+    correctSfx: {fileID: 8300000, guid: aa3a952453d97fe47989ed7921763eac, type: 3}
+    wrongSfx: {fileID: 8300000, guid: aa3a952453d97fe47989ed7921763eac, type: 3}
     background: {fileID: 0}
   - speakerName: Guru
     questionText: Hasil dari 5 x 2 adalah?
@@ -36,9 +38,11 @@ MonoBehaviour:
       isCorrect: 0
     voice: {fileID: 0}
     musicBackground: {fileID: 0}
+    correctSfx: {fileID: 8300000, guid: aa3a952453d97fe47989ed7921763eac, type: 3}
+    wrongSfx: {fileID: 8300000, guid: aa3a952453d97fe47989ed7921763eac, type: 3}
     background: {fileID: 0}
-  endAction: 0
-  sceneToLoad: 
+  endAction: 1
+  sceneToLoad: dialog1
   onComplete:
     m_PersistentCalls:
       m_Calls: []

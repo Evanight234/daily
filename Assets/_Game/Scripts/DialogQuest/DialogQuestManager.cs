@@ -13,6 +13,7 @@ public class DialogQuestManager : MonoBehaviour
     [SerializeField] Image backgroundImage;
     [SerializeField] AudioSource voiceSource;
     [SerializeField] AudioSource musicSource;
+    [SerializeField] AudioSource sfxSource;
     [SerializeField] GameObject dialogBox;
     [SerializeField] bool playOnStart = true;
     [SerializeField] Vector2 optionsPosition = new Vector2(0, 100);
@@ -48,7 +49,40 @@ public class DialogQuestManager : MonoBehaviour
         musicSource.playOnAwake = false;
         musicSource.loop = true;
 
+        if (sfxSource == null)
+            sfxSource = gameObject.AddComponent<AudioSource>();
+        sfxSource.playOnAwake = false;
+
         CreateQuestionUI();
+    }
+
+    void OnEnable()
+    {
+        SettingsPopup.onBGMChanged += SetBGMVolume;
+        SettingsPopup.onVoiceChanged += SetVoiceVolume;
+        SettingsPopup.onSFXChanged += SetSFXVolume;
+    }
+
+    void OnDisable()
+    {
+        SettingsPopup.onBGMChanged -= SetBGMVolume;
+        SettingsPopup.onVoiceChanged -= SetVoiceVolume;
+        SettingsPopup.onSFXChanged -= SetSFXVolume;
+    }
+
+    void SetBGMVolume(float value)
+    {
+        if (musicSource != null) musicSource.volume = value;
+    }
+
+    void SetVoiceVolume(float value)
+    {
+        if (voiceSource != null) voiceSource.volume = value;
+    }
+
+    void SetSFXVolume(float value)
+    {
+        if (sfxSource != null) sfxSource.volume = value;
     }
 
     void Start()
@@ -250,6 +284,18 @@ public class DialogQuestManager : MonoBehaviour
 
         bool isCorrect = _currentQuestion.options[index].isCorrect;
         ApplyAnswerVisuals(index);
+
+        if (sfxSource != null)
+        {
+            sfxSource.Stop();
+            AudioClip clip = isCorrect ? _currentQuestion.correctSfx : _currentQuestion.wrongSfx;
+            if (clip != null)
+            {
+                sfxSource.clip = clip;
+                sfxSource.volume = PlayerPrefs.GetFloat("SFXVolume", 0.8f);
+                sfxSource.Play();
+            }
+        }
 
         string feedback = isCorrect
             ? LocalizationManager.Get("dialog.correct")

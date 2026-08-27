@@ -17,6 +17,7 @@ public class DialogLine
     public string text;
     public AudioClip voice;
     public AudioClip musicBackground;
+    public AudioClip sfx;
     public Sprite background;
 }
 

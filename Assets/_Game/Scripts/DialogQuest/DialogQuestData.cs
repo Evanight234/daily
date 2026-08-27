@@ -19,6 +19,8 @@ public class DialogQuestLine
     public DialogOption[] options;
     public AudioClip voice;
     public AudioClip musicBackground;
+    public AudioClip correctSfx;
+    public AudioClip wrongSfx;
     public Sprite background;
 }
 
